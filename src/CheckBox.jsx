@@ -5,8 +5,8 @@ function CheckboxGroup() {//hardcoded boolean arrays for now
   const [parents, setParents] = useState([false, false, false]);
   const [children, setChildren] = useState([
     [false, false, false],
-    [false, false, false],
-    [false, false, false],
+    [false, false, false, false],
+    [false, false, false ,false ,false],
   ]);
 
   const toggleSelectAll = () => {
@@ -17,7 +17,7 @@ function CheckboxGroup() {//hardcoded boolean arrays for now
     setParents(updatedParents);
 
     const updatedChildren = children.map(() =>//then maps that value onto children
-      children[0].map(() => allChecked)
+      children[2].map(() => allChecked)
     );
     setChildren(updatedChildren);
   };
