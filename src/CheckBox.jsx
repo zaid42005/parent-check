@@ -1,103 +1,77 @@
-import React, { useState, useEffect } from 'react';
+/* eslint-disable react/prop-types */
+import React, { useState, useEffect } from "react";
 
-function CheckboxGroup() {//hardcoded boolean arrays for now 
+function CheckboxGroup({ numChildrenPerFamily }) {
+  const initialFamily = numChildrenPerFamily.map((numChildren) => ({
+    parent: false,
+    children: Array(numChildren).fill(false),
+  }));
+
   const [selectAll, setSelectAll] = useState(false);
-  const [parents, setParents] = useState([false, false, false]);
-  const [children, setChildren] = useState([
-    [false, false, false],
-    [false, false, false, false],
-    [false, false, false ,false ,false],
-  ]);
+  const [families, setFamilies] = useState(initialFamily);
 
-  const toggleSelectAll = () => {
-    const allChecked = !selectAll; //once its toggled it takes the switches the value and sets it to the button
+  useEffect(() => {
+    const allChecked = families.every((family) => family.parent);
     setSelectAll(allChecked);
+  }, [families]);
 
-    const updatedParents = parents.map(() => allChecked);//then maps that value onto parents
-    setParents(updatedParents);
-
-    const updatedChildren = children.map(() =>//then maps that value onto children
-      children[2].map(() => allChecked)
-    );
-    setChildren(updatedChildren);
+  const toggleFamilySelectAll = (familyIndex) => {
+    const updatedFamilies = [...families]; //make a copy
+    updatedFamilies[familyIndex].parent = !families[familyIndex].parent; // toggles parents
+    updatedFamilies[familyIndex].children = updatedFamilies[familyIndex].parent //toggle children and update the children
+      ? updatedFamilies[familyIndex].children.map(() => true) //gonna try implementing toggleChild instead of manually mapping them
+      : updatedFamilies[familyIndex].children.map(() => false);
+    setFamilies(updatedFamilies); 
   };
 
-  const handleParentChange = (parentIndex) => {
-    const updatedParents = [...parents]; //make a copy just in case
-    updatedParents[parentIndex] = !parents[parentIndex]; //switch value
-    setParents(updatedParents);
-
-    const updatedChildren = [...children]; //same thing but for the kids
-    updatedChildren[parentIndex] = updatedParents[parentIndex] //pass that parent value down and use an if for safety
-      ? updatedChildren[parentIndex].map(() => true)
-      : updatedChildren[parentIndex].map(() => false);
-    setChildren(updatedChildren);
-
-    
-    setSelectAll(false); //will deal w this later
+  const toggleChild = (familyIndex, childIndex) => {
+    const updatedFamilies = [...families]; //copy
+    updatedFamilies[familyIndex].children[childIndex] = //toggle the specific child
+      !families[familyIndex].children[childIndex];
+    updatedFamilies[familyIndex].parent = updatedFamilies[
+      familyIndex
+    ].children.every((child) => child); //check every kid and then update the parent
+    setFamilies(updatedFamilies);
   };
-
-  const handleChildChange = (parentIndex, childIndex) => {
-    const updatedChildren = [...children];
-    updatedChildren[parentIndex][childIndex] = !children[parentIndex][childIndex]; // same logic as above
-    setChildren(updatedChildren);
-  
-    const updatedParents = [...parents];
-  
-
-    updatedParents[parentIndex] = updatedChildren[parentIndex].every( //check parent against all children
-      (child) => child === true
-    );
-  
-    setParents(updatedParents);
-  
-    setSelectAll(false);
-  };
-  
-  
-
-  
-  useEffect(() => {// useEffect clutching up for the selectAll button 
-    const allParentsChecked = parents.every((parent) => parent === true);
-    const allChildrenChecked = children.every((childRow) => childRow.every((child) => child === true)
-    );
-    setSelectAll(allParentsChecked && allChildrenChecked);
-  }, [parents, children]);
 
   return (
-    <div >
+    <div>
       <label>
         <input
           type="checkbox"
           checked={selectAll}
-          onChange={toggleSelectAll}
+          onChange={() => {
+            const updatedFamilies = families.map((family) => ({
+              parent: !selectAll,
+              children: Array(family.children.length).fill(!selectAll),
+            }));
+            setFamilies(updatedFamilies);
+          }}
         />
         Select All
       </label>
-      {parents.map((parent, parentIndex) => (
-        <div key={parentIndex} >
-          <label >
+      <br />
+      {families.map((family, familyIndex) => (
+        <div key={familyIndex}>
+          <label>
             <input
               type="checkbox"
-              checked={parent}
-              onChange={() => handleParentChange(parentIndex)}
+              checked={family.parent}
+              onChange={() => toggleFamilySelectAll(familyIndex)}
             />
-            Parent {parentIndex + 1}
-            
-            {children[parentIndex].map((child, childIndex) => (
-            <label key={childIndex} style={{ display: "flex", flexDirection: "column"}}  >
+            Parent {familyIndex + 1}
+          </label>
+          {family.children.map((child, childIndex) => (
+            <label key={childIndex}>
               <input
                 type="checkbox"
                 checked={child}
-                onChange={() => handleChildChange(parentIndex, childIndex)}
+                onChange={() => toggleChild(familyIndex, childIndex)}
               />
               Child {childIndex + 1}
             </label>
           ))}
-
-          </label >
         </div>
-        
       ))}
     </div>
   );

@@ -9,11 +9,11 @@ function App() {
 
   return (
     <>
-      <div>
-        <CheckboxGroup/>
+      <div className = "App"> 
+      <CheckboxGroup numChildrenPerFamily={[2, 3, 1,500]} />
       </div>
     </>
-  )
+  ) //since each family only has one parent just pass in the number of children you want in each family as an array makes it easier to generate 
 }
 
 export default App
